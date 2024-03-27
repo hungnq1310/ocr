@@ -1,7 +1,11 @@
 from distutils.core import setup
 from setuptools import find_packages
+import os
 
-with open('README.md', encoding='utf-8') as file:
+with open(
+    os.path.abspath(os.curdir) + "/" + 'README.md', 
+    encoding='utf-8'
+) as file:
     description = file.read()
 
 setup(
