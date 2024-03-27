@@ -2,8 +2,10 @@ from distutils.core import setup
 from setuptools import find_packages
 import os
 
+print(os.getcwd())
+
 with open(
-    os.path.abspath(os.curdir) + "/" + 'README.md', 
+    '../README.md', 
     encoding='utf-8'
 ) as file:
     description = file.read()
