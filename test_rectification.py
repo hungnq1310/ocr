@@ -7,7 +7,6 @@ import argparse
 import time
 
 import cv2
-import glob
 import numpy as np
 import os
 
@@ -17,11 +16,31 @@ import pdf2image
 
 from PIL import Image
 from pathlib import Path
+from tqdm import tqdm
 
-
+from craftdet.detection import Detector
+from craftdet.utils.image import read_image
+from vietocr.tool.predictor import Predictor
+from vietocr.tool.config import Cfg
 from preprocessor.model import DewarpTextlineMaskGuide
 
+# OCR utils
+def bbox2ibox(points):
+  min_x, min_y = min(points[:, 0]), min(points[:, 1])
+  max_x, max_y = max(points[:, 0]), max(points[:, 1])
+  return (int(min_x), int(min_y)), (int(max_x), int(max_y))
 
+
+def cv2crop(img, a, b):
+  crop = img[a[1]:b[1], a[0]:b[0]]
+  return crop
+
+
+def cv2drawbox(img, a, b):
+  img = cv2.rectangle(img, a, b, color=(255, 0, 0), thickness=2)
+  return img
+
+# Document Image Rectification
 def str2bool(v):
     if isinstance(v, bool):
         return v
@@ -85,7 +104,7 @@ def predict(img_intput, save_path, filename, recti_model):
 
     cv2.imwrite(filename, img_geo[:, :, ::-1])  # save
 
-    return ps_time
+    return img_geo, ps_time
 
 
 if __name__ == '__main__':
@@ -104,16 +123,6 @@ if __name__ == '__main__':
 
     images = pdf2imgs(parser.file_path)
     save_path = parser.save_rectif_path
-    total_time = 0.0
-
-    start = time.time()
-    img_num = 0.0
-    for idx, image in enumerate(images):  # img_names:  #
-        filename = (save_path + f"{idx}.png")
-        total_time += predict(image, save_path, filename, recti_model)
-        img_num += 1
-
-    print('FPS: %.1f' % (1.0 / (total_time / img_num)))
 
     ########
     # OCR
@@ -124,3 +133,52 @@ if __name__ == '__main__':
     out_dir = Path(parser.save_ocr_path).expanduser().resolve()
     os.makedirs(out_dir, exist_ok=True)
     #
+    detector = Detector(
+        craft=os.getcwd() + '/weights/craft/mlt25k.pth',
+        refiner=os.getcwd() + '/weights/craft/refinerCTW1500.pth',
+        use_cuda=True
+    )
+    #
+    config = Cfg.load_config_from_name('vgg_transformer')
+    config['weights'] = str(Path(os.getcwd() + '/weights/ocr/vgg_transformer.pth').expanduser().resolve())
+    config['device'] = 'cpu'
+    ocr = Predictor(config)
+
+    ########
+    # Process
+    ########
+
+    total_time = 0.0
+
+    start = time.time()
+    img_num = 0.0
+    for idx, image in enumerate(images):  # img_names:  
+        # predict rectification
+        filename = (save_path + f"{idx}.png")
+        img_rectify, time_process = predict(image, save_path, filename, recti_model)
+        total_time += time_process
+        img_num += 1
+
+        # predict OCR
+        texts = []
+        z = detector.detect(img_rectify)
+        for j in tqdm(range(len(z['boxes'])), desc='Process page ({}/{})'.format(idx + 1, len(images))):
+            ib = bbox2ibox(z['boxes'][j])
+            img_rectify_crop = cv2crop(img_rectify, ib[0], ib[1])
+        
+            text = ocr.predict(Image.fromarray(img_rectify_crop))
+            texts.append(text)
+            img_rectify_crop = cv2drawbox(img_rectify_crop, ib[0], ib[1])
+
+        # Output image.
+        img_path = os.path.join(out_dir, '{}.jpg'.format(idx))
+        img_out = cv2.cvtColor(img_rectify, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(img_path, img_out)
+        
+        # Text logs.
+        log_path = os.path.join(out_dir, '{}.txt'.format(idx))
+        with open(log_path, 'w') as f:
+            for line in texts:
+                f.write("%s\n" % line)
+
+    print('FPS: %.1f' % (1.0 / (total_time / img_num)))
