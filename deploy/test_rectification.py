@@ -16,10 +16,10 @@ from PIL import Image
 from pathlib import Path
 from tqdm import tqdm
 
-from craftdet.detection import Detector
+from src.craftdet.detection import Detector
 from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
-from preprocessor.model import DewarpTextlineMaskGuide
+from src.preprocessor.model import DewarpTextlineMaskGuide
 from deploy.utils import pdf2imgs, bbox2ibox, cv2crop, cv2drawbox
 
 
