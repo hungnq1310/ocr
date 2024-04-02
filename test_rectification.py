@@ -45,7 +45,8 @@ def get_args():
     parser.add_argument('--file_path', type=str, default='data/rectification/',
                         help='file path or path to folder containing files')
 
-    parser.add_argument('--save_path', type=str, default='prediction/rectification/', help='save path')
+    parser.add_argument('--save_rectif_path', type=str, default='prediction/rectification/', help='save path')
+    parser.add_argument('--save_ocr_path', type=str, default='prediction/ocr/', help='save path')
 
     return parser.parse_args()
 
@@ -90,6 +91,9 @@ def predict(img_intput, save_path, filename, recti_model):
 if __name__ == '__main__':
     parser = get_args()
 
+    ########
+    # Rerctification
+    ########
     recti_model = DewarpTextlineMaskGuide(image_size=parser.input_size)
     recti_model = torch.nn.DataParallel(recti_model)
     state_dict = torch.load(parser.model_path, map_location='cpu')
@@ -99,7 +103,7 @@ if __name__ == '__main__':
     print('model loaded')
 
     images = pdf2imgs(parser.file_path)
-    save_path = parser.save_path
+    save_path = parser.save_rectif_path
     total_time = 0.0
 
     start = time.time()
@@ -110,3 +114,13 @@ if __name__ == '__main__':
         img_num += 1
 
     print('FPS: %.1f' % (1.0 / (total_time / img_num)))
+
+    ########
+    # OCR
+    ########
+
+    lsd = cv2.createLineSegmentDetector()
+    #
+    out_dir = Path(parser.save_ocr_path).expanduser().resolve()
+    os.makedirs(out_dir, exist_ok=True)
+    #
