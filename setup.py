@@ -5,7 +5,7 @@ import os
 print(os.getcwd())
 
 with open(
-    '../README.md', 
+    'README.md', 
     encoding='utf-8'
 ) as file:
     description = file.read()
@@ -13,7 +13,9 @@ with open(
 setup(
     name='craftdet',
     version='0.0.1',
-    packages=find_packages(),
+    packages=find_packages(
+        "src",
+    ),
     license='Copyright (c) 2023 Hieu Pham',
     zip_safe=True,
     description='Implementation of CRAFT: Character Region Awareness For Text detection.',
