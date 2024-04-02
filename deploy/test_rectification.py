@@ -12,50 +12,16 @@ import os
 
 import torch
 import torch.nn.functional as F
-import pdf2image
-
 from PIL import Image
 from pathlib import Path
 from tqdm import tqdm
 
 from craftdet.detection import Detector
-from craftdet.utils.image import read_image
 from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
 from preprocessor.model import DewarpTextlineMaskGuide
+from deploy.utils import pdf2imgs, bbox2ibox, cv2crop, cv2drawbox
 
-# OCR utils
-def bbox2ibox(points):
-  min_x, min_y = min(points[:, 0]), min(points[:, 1])
-  max_x, max_y = max(points[:, 0]), max(points[:, 1])
-  return (int(min_x), int(min_y)), (int(max_x), int(max_y))
-
-
-def cv2crop(img, a, b):
-  crop = img[a[1]:b[1], a[0]:b[0]]
-  return crop
-
-
-def cv2drawbox(img, a, b):
-  img = cv2.rectangle(img, a, b, color=(255, 0, 0), thickness=2)
-  return img
-
-# Document Image Rectification
-def str2bool(v):
-    if isinstance(v, bool):
-        return v
-    if v.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
-
-def pdf2imgs(path):
-  path = Path(path).expanduser().resolve()
-  imgs = pdf2image.convert_from_path(str(path))
-  imgs = [np.array(x) for x in imgs] if isinstance(imgs, list) else [imgs]
-  return imgs
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -104,7 +70,7 @@ def predict(img_intput, save_path, filename, recti_model):
 
     cv2.imwrite(filename, img_geo[:, :, ::-1])  # save
 
-    return img_geo, ps_time
+    return img_geo[:, :, ::-1], ps_time
 
 
 if __name__ == '__main__':
@@ -156,6 +122,7 @@ if __name__ == '__main__':
         # predict rectification
         filename = (save_path + f"{idx}.png")
         img_rectify, time_process = predict(image, save_path, filename, recti_model)
+        img_rectify = np.ascontiguousarray(img_rectify)
         total_time += time_process
         img_num += 1
 
@@ -168,7 +135,7 @@ if __name__ == '__main__':
         
             text = ocr.predict(Image.fromarray(img_rectify_crop))
             texts.append(text)
-            img_rectify_crop = cv2drawbox(img_rectify_crop, ib[0], ib[1])
+            img_rectify = cv2drawbox(img_rectify, ib[0], ib[1])
 
         # Output image.
         img_path = os.path.join(out_dir, '{}.jpg'.format(idx))
