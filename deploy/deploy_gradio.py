@@ -174,10 +174,10 @@ if __name__ == '__main__':
 
         with gr.Row():
             rectification_predict = gr.Gallery(
-                label="Rectification Prediction", show_label=True, columns=[1], object_fit="contain", height="auto", format="jpg"
+                label="Rectification Prediction", show_label=True, columns=1, object_fit="contain", format="jpg"
             )
             ocr_predict = gr.Gallery(
-                label="OCR Prediction", show_label=True, columns=[1], object_fit="contain", height="auto", format="jpg"
+                label="OCR Prediction", show_label=True, columns=1, object_fit="contain", format="jpg"
             )
     
         upload_button.upload(upload_file, upload_button, file_output)
