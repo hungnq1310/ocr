@@ -28,13 +28,11 @@ DEFAULT_SIZE_IMAGE = 224
 #
 recti_model = DewarpTextlineMaskGuide(image_size=DEFAULT_SIZE_IMAGE)
 recti_model = torch.nn.DataParallel(recti_model)
-state_dict = torch.load(os.getcwd() + '/weights/rectification/30.pt', map_location='cpu')
+state_dict = torch.load(os.getcwd() + '/weights/rectification/30.pt', map_location='cuda:0')
 #
 recti_model.load_state_dict(state_dict)
 recti_model.cuda()
 save_rectif_path = Path(os.getcwd()+ "/prediction/rectification").expanduser().resolve()
-os.system('rm -rf {}'.format(save_rectif_path))
-os.makedirs(save_rectif_path, exist_ok=True)
 
 ########
 # OCR
@@ -50,12 +48,9 @@ detector = Detector(
 #
 config = Cfg.load_config_from_name('vgg_transformer')
 config['weights'] = str(Path(os.getcwd() + '/weights/ocr/vgg_transformer.pth').expanduser().resolve())
-config['device'] = 'cpu'
+config['device'] = 'cuda:0'
 ocr = Predictor(config)
-#
 save_ocr_path = Path(os.getcwd()+ "/prediction/ocr").expanduser().resolve()
-os.system('rm -rf {}'.format(save_ocr_path))
-os.makedirs(save_ocr_path, exist_ok=True)
 
 ##########
 
@@ -111,13 +106,20 @@ def run(file_paths):
     if not isinstance(file_paths, list):
         file_paths = [file_paths]
 
+    # clear output folder
+    os.system('rm -rf {}'.format(save_rectif_path))
+    os.makedirs(save_rectif_path, exist_ok=True)
+    os.system('rm -rf {}'.format(save_ocr_path))
+    os.makedirs(save_ocr_path, exist_ok=True)
+
+    # run
+    start = time.time()
     for file_path in file_paths:
         name_file = file_path.split('/')[-1]
 
         # read file
         images = pdf2imgs(file_path)
 
-        start = time.time()
         img_num = 0.0
         for idx, image in enumerate(images):  # img_names:  
             # predict rectification
@@ -131,13 +133,15 @@ def run(file_paths):
             # predict OCR
             texts = []
             z = detector.detect(img_rectify)
+
+            batch_img_rectify_crop = []
             for j in tqdm(range(len(z['boxes'])), desc='Process page ({}/{})'.format(idx + 1, len(images))):
                 ib = bbox2ibox(z['boxes'][j])
                 img_rectify_crop = cv2crop(img_rectify, ib[0], ib[1])
-            
-                text = ocr.predict(Image.fromarray(img_rectify_crop))
-                texts.append(text)
+                batch_img_rectify_crop.append(Image.fromarray(img_rectify_crop))
                 img_rectify = cv2drawbox(img_rectify, ib[0], ib[1])
+
+            texts = ocr.predict_batch(batch_img_rectify_crop)
 
             # Output image.
             img_path = os.path.join(save_ocr_path, f'{name_file}_{idx}.jpg')
@@ -151,6 +155,8 @@ def run(file_paths):
                     f.write("%s\n" % line)
 
             # print('FPS: %.1f' % (1.0 / (total_time / img_num)))
+        entime = time.time() - start
+        print("Total time for prediction: ", entime)
     
     return [
         glob.glob(str(save_rectif_path) + '/*.jpg'),
