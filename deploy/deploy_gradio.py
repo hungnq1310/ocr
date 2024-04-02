@@ -20,6 +20,7 @@ from src.preprocessor.model import DewarpTextlineMaskGuide
 from deploy.utils import pdf2imgs, bbox2ibox, cv2crop, cv2drawbox
 
 DEFAULT_SIZE_IMAGE = 224
+save_origin_path = Path(os.getcwd() + "/prediction/origin").expanduser().resolve()
 
 ########
 # Rerctification
@@ -107,6 +108,8 @@ def run(file_paths):
         file_paths = [file_paths]
 
     # clear output folder
+    os.system('rm -rf {}'.format(save_origin_path))
+    os.makedirs(save_origin_path, exist_ok=True)
     os.system('rm -rf {}'.format(save_rectif_path))
     os.makedirs(save_rectif_path, exist_ok=True)
     os.system('rm -rf {}'.format(save_ocr_path))
@@ -116,15 +119,29 @@ def run(file_paths):
     start = time.time()
     for file_path in file_paths:
         name_file = file_path.split('/')[-1]
+        extension = file_path.split('.')[-1]
 
+        images = []
         # read file
-        images = pdf2imgs(file_path)
+        if extension == 'pdf':
+            print("Converting PDF to images...")
+            images = pdf2imgs(file_path)
+        elif extension in ['jpg', 'jpeg', 'png']:
+            images.append(Image.open(file_path))
+        elif extension in ['mp4']:
+            cap = cv2.VideoCapture(file_path)
+            nframes = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            print("Capturing video...")
+            for i in range(nframes):
+                ret, frame = cap.read()
+                images.append(frame)
+            cv2.destroyAllWindows()
+    
 
         img_num = 0.0
         for idx, image in enumerate(images):  # img_names:  
             # predict rectification
             filename =  os.path.join(save_rectif_path, f"{name_file}_{idx}.jpg")
-            print(filename)
             img_rectify, time_process = predict(image, save_rectif_path, filename, recti_model)
             img_rectify = np.ascontiguousarray(img_rectify)
             total_time += time_process
@@ -144,12 +161,14 @@ def run(file_paths):
             texts = ocr.predict_batch(batch_img_rectify_crop)
 
             # Output image.
+            ori_img_path = os.path.join(save_origin_path, f'origin_image_{idx}.jpg')
+            cv2.imwrite(ori_img_path, np.asarray(image))
             img_path = os.path.join(save_ocr_path, f'{name_file}_{idx}.jpg')
             img_out = cv2.cvtColor(img_rectify, cv2.COLOR_RGB2BGR)
             cv2.imwrite(img_path, img_out)
             
             # Text logs.
-            log_path = os.path.join(save_ocr_path, '{}.txt'.format(idx))
+            log_path = os.path.join(save_ocr_path, 'image_content{}.txt'.format(idx))
             with open(log_path, 'w') as f:
                 for line in texts:
                     f.write("%s\n" % line)
@@ -159,8 +178,10 @@ def run(file_paths):
         print("Total time for prediction: ", entime)
     
     return [
+        glob.glob(str(save_origin_path) + '/*.jpg'),
+        glob.glob(str(save_ocr_path) + '/*.txt'),
         glob.glob(str(save_rectif_path) + '/*.jpg'),
-        glob.glob(str(save_ocr_path) + '/*.jpg')
+        glob.glob(str(save_ocr_path) + '/*.jpg'),
     ]
 
 
@@ -171,6 +192,12 @@ if __name__ == '__main__':
         with gr.Row():
             upload_button = gr.UploadButton("Upload a file or files", file_count="multiple")
             trans_button = gr.Button("Predict")
+
+        with gr.Row():
+            original = gr.Gallery(
+                label="Original Image", show_label=True, columns=1, object_fit="contain", format="jpg"
+            )
+            content_detect = gr.Files(None, label="Content detection of OCR")
 
         with gr.Row():
             rectification_predict = gr.Gallery(
@@ -185,6 +212,11 @@ if __name__ == '__main__':
         trans_button.click(
             fn=run, 
             inputs=file_output, 
-            outputs=[rectification_predict, ocr_predict]
+            outputs=[
+                original, 
+                content_detect,
+                rectification_predict, 
+                ocr_predict,               
+            ]
         )
     demo.launch(share=True)
