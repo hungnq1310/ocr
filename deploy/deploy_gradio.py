@@ -187,4 +187,4 @@ if __name__ == '__main__':
             inputs=file_output, 
             outputs=[rectification_predict, ocr_predict]
         )
-    demo.launch()
+    demo.launch(share=True)
