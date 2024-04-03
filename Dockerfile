@@ -4,7 +4,7 @@ FROM hieupth/mamba:pypy3 AS build
 ADD . .
 RUN apt-get update && \
     mamba install -c conda-forge conda-pack && \
-    mamba env create -f environment.yml \
+    mamba env create -f environment.yml && \
     apt-get install ffmpeg libsm6 libxext6  -y
 
 # Make RUN commands use the new environment:
