@@ -1,0 +1,8 @@
+name: craftdet
+
+dependencies:
+  - opencv
+  - numpy
+  - onnxruntime
+  - fastapi
+  - pillow
