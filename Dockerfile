@@ -4,8 +4,7 @@ FROM hieupth/mamba:pypy3 AS build
 ADD . .
 RUN apt-get update && \
     mamba install -c conda-forge conda-pack && \
-    mamba env create -f environment.yml && \
-    apt-get install ffmpeg libsm6 libxext6  -y
+    mamba env create -f environment.yml
 
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "craftdet", "/bin/bash", "-c"]
@@ -19,19 +18,15 @@ RUN conda-pack -n craftdet -o /tmp/env.tar && \
 RUN /venv/bin/conda-unpack
 
 # Runtime stage:
-FROM python:latest 
+FROM ubuntu:22.04 AS runtime
 
 # Copy /venv from the previous stage:
 COPY --from=build /venv /venv
-
+# 
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+# 
+SHELL ["/bin/bash", "-c"]
 #
-RUN pip install gradio mmcv vietocr pdf2image
-
-WORKDIR /craftdet
-
-COPY ./deploy /craftdet/deploy
-COPY ./src /craftdet/src
-COPY ./weights /craftdet/weights
-
-CMD ["python", "deploy/deploy_gradio.py"]
-
+ENTRYPOINT source /venv/bin/activate && \
+           pip install gradio mmcv vietocr pdf2image && \
+           python deploy/deploy_gradio.py
