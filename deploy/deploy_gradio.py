@@ -219,4 +219,4 @@ if __name__ == '__main__':
                 ocr_predict,               
             ]
         )
-    demo.launch(share=True)
+    demo.queue().launch(server_port=7000, server_name='0.0.0.0', share=False)
