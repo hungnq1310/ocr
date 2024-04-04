@@ -32,7 +32,7 @@ recti_model = torch.nn.DataParallel(recti_model)
 state_dict = torch.load(os.getcwd() + '/weights/rectification/30.pt', map_location='cpu')
 #
 recti_model.load_state_dict(state_dict)
-recti_model.cuda()
+# recti_model.cuda()
 save_rectif_path = Path(os.getcwd()+ "/prediction/rectification").expanduser().resolve()
 
 ########
