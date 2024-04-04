@@ -17,7 +17,7 @@ from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
 from src.preprocessor.model import DewarpTextlineMaskGuide
 
-from deploy.utils import pdf2imgs, bbox2ibox, cv2crop, cv2drawbox
+from .utils import pdf2imgs, bbox2ibox, cv2crop, cv2drawbox
 
 DEFAULT_SIZE_IMAGE = 224
 save_origin_path = Path(os.getcwd() + "/prediction/origin").expanduser().resolve()
