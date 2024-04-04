@@ -33,5 +33,6 @@ RUN apt-get update && apt-get install libgl1-mesa-glx libegl1-mesa libopengl0 -y
 SHELL ["/bin/bash", "-c"]
 #
 ENTRYPOINT source /venv/bin/activate && \
-           pip install gradio mmcv vietocr pdf2image && \
+           pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
+           pip install gradio vietocr pdf2image && \
            python deploy/deploy_gradio.py
