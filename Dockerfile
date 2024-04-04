@@ -28,7 +28,7 @@ COPY ./weights /weights
 COPY ./prediction /prediction 
 
 # 
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 libgl1-mesa-glx -y
 # 
 SHELL ["/bin/bash", "-c"]
 #
