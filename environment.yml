@@ -1,6 +1,7 @@
 name: craftdet
 
 dependencies:
+  - python=3.11
   - opencv
   - numpy
   - onnxruntime
