@@ -22,6 +22,11 @@ FROM ubuntu:22.04 AS runtime
 
 # Copy /venv from the previous stage:
 COPY --from=build /venv /venv
+# Copy folders outside src
+COPY ./deploy /deploy
+COPY ./weights /weights 
+COPY ./prediction /prediction 
+
 # 
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 # 
