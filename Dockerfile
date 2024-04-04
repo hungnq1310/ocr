@@ -8,10 +8,7 @@ RUN apt-get update && \
 
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "craftdet", "/bin/bash", "-c"]
-# 
-RUN pip install . && \
-    pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
-    pip install gradio vietocr pdf2image
+
 # 
 RUN conda-pack -n craftdet -o /tmp/env.tar && \
     mkdir /venv && cd /venv && tar xf /tmp/env.tar && \
@@ -34,4 +31,7 @@ RUN apt-get update && apt-get install libgl1-mesa-glx libegl1-mesa libopengl0 -y
 SHELL ["/bin/bash", "-c"]
 #
 ENTRYPOINT source /venv/bin/activate && \
+           pip install . && \ 
+           pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
+           pip install gradio vietocr pdf2image && \
            python deploy/deploy_gradio.py
