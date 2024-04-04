@@ -29,7 +29,7 @@ save_origin_path = Path(os.getcwd() + "/prediction/origin").expanduser().resolve
 #
 recti_model = DewarpTextlineMaskGuide(image_size=DEFAULT_SIZE_IMAGE)
 recti_model = torch.nn.DataParallel(recti_model)
-state_dict = torch.load(os.getcwd() + '/weights/rectification/30.pt', map_location='cuda:0')
+state_dict = torch.load(os.getcwd() + '/weights/rectification/30.pt', map_location='cpu')
 #
 recti_model.load_state_dict(state_dict)
 recti_model.cuda()
@@ -49,7 +49,7 @@ detector = Detector(
 #
 config = Cfg.load_config_from_name('vgg_transformer')
 config['weights'] = str(Path(os.getcwd() + '/weights/ocr/vgg_transformer.pth').expanduser().resolve())
-config['device'] = 'cuda:0'
+config['device'] = 'cpu'
 ocr = Predictor(config)
 save_ocr_path = Path(os.getcwd()+ "/prediction/ocr").expanduser().resolve()
 
