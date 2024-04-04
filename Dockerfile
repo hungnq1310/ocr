@@ -21,9 +21,10 @@ FROM ubuntu:22.04 AS runtime
 
 # Copy /venv from the previous stage:
 COPY --from=build /venv /venv
-# Copy folders outside src
-COPY . .
-
+# Copy
+COPY . /ocr
+# set workdir
+WORKDIR /ocr
 # 
 RUN apt-get update && apt-get install libgl1-mesa-glx libegl1-mesa libopengl0 -y
 # 
