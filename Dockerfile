@@ -9,7 +9,7 @@ RUN apt-get update && \
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "craftdet", "/bin/bash", "-c"]
 # 
-RUN mamba uninstall pillow -y && \
+RUN mamba uninstall pillow -y --force && \
     pip install vietocr gradio && \
     pip install . 
 # 
