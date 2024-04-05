@@ -1,8 +1,13 @@
 name: craftdet
 
 dependencies:
+  - python=3.11
+  - pytorch
+  - torchvision 
   - opencv
   - numpy
   - onnxruntime
   - fastapi
-  - pillow
+  - mmcv=2.1.0
+  - gradio 
+  - pdf2image

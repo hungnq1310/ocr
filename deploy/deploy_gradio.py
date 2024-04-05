@@ -12,12 +12,12 @@ from PIL import Image
 from pathlib import Path
 from tqdm import tqdm
 
-from src.craftdet.detection import Detector
+
 from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
+from src.craftdet.detection import Detector
 from src.preprocessor.model import DewarpTextlineMaskGuide
-
-from deploy.utils import pdf2imgs, bbox2ibox, cv2crop, cv2drawbox
+from src.utils import pdf2imgs, bbox2ibox, cv2crop, cv2drawbox
 
 DEFAULT_SIZE_IMAGE = 224
 save_origin_path = Path(os.getcwd() + "/prediction/origin").expanduser().resolve()
@@ -29,10 +29,10 @@ save_origin_path = Path(os.getcwd() + "/prediction/origin").expanduser().resolve
 #
 recti_model = DewarpTextlineMaskGuide(image_size=DEFAULT_SIZE_IMAGE)
 recti_model = torch.nn.DataParallel(recti_model)
-state_dict = torch.load(os.getcwd() + '/weights/rectification/30.pt', map_location='cuda:0')
+state_dict = torch.load(os.getcwd() + '/weights/rectification/30.pt', map_location='cpu')
 #
 recti_model.load_state_dict(state_dict)
-recti_model.cuda()
+# recti_model.cuda()
 save_rectif_path = Path(os.getcwd()+ "/prediction/rectification").expanduser().resolve()
 
 ########
@@ -49,7 +49,7 @@ detector = Detector(
 #
 config = Cfg.load_config_from_name('vgg_transformer')
 config['weights'] = str(Path(os.getcwd() + '/weights/ocr/vgg_transformer.pth').expanduser().resolve())
-config['device'] = 'cuda:0'
+config['device'] = 'cpu'
 ocr = Predictor(config)
 save_ocr_path = Path(os.getcwd()+ "/prediction/ocr").expanduser().resolve()
 
@@ -219,4 +219,5 @@ if __name__ == '__main__':
                 ocr_predict,               
             ]
         )
-    demo.launch(share=True)
+    print("Running server...")
+    demo.queue().launch(server_port=7860, server_name='0.0.0.0', share=False)
