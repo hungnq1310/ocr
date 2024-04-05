@@ -16,24 +16,57 @@ RUN conda-pack -n craftdet -o /tmp/env.tar && \
 # 
 RUN /venv/bin/conda-unpack
 
-# Runtime stage:
-FROM ubuntu:22.04 AS runtime
+# # Runtime stage:
+# FROM ubuntu:22.04 AS runtime
 
-# Copy /venv from the previous stage:
-COPY --from=build /venv /venv
-# Copy
+# # Copy /venv from the previous stage:
+# COPY --from=build /venv /venv
+# # Copy
+# COPY . /ocr
+# # set workdir
+# WORKDIR /ocr
+# # 
+# RUN apt-get update && apt-get install libgl1-mesa-glx libegl1-mesa libopengl0 -y
+# # 
+# SHELL ["/bin/bash", "-c"]
+# #
+# RUN source /venv/bin/activate && \
+#     pip install . && \ 
+#     pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
+#     pip install gradio vietocr pdf2image
+
+# ENTRYPOINT source /venv/bin/activate && \
+#            python deploy/deploy_gradio.py
+
+# # Test with new usage case
+FROM python:3.11-slim as compiler
+ENV PYTHONUNBUFFERED 1
+
+# Copy 
 COPY . /ocr
-# set workdir
-WORKDIR /ocr
-# 
-RUN apt-get update && apt-get install libgl1-mesa-glx libegl1-mesa libopengl0 -y
-# 
-SHELL ["/bin/bash", "-c"]
-#
-RUN source /venv/bin/activate && \
-    pip install . && \ 
+# # set workdir
+WORKDIR /ocr/
+
+# RUN python -m venv /venv -> not create venv but instead use the existing one
+COPY --from=build /venv /venv
+
+# Enable venv
+ENV PATH="venv/bin:$PATH"
+
+RUN pip install . && \ 
     pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
     pip install gradio vietocr pdf2image
 
-ENTRYPOINT source /venv/bin/activate && \
-           python deploy/deploy_gradio.py
+# Runtime stage
+FROM python:3.11-slim as runner
+# Copy 
+COPY . /ocr
+WORKDIR /ocr/
+
+COPY --from=compiler /venv /venv
+
+ENV PATH="/venv/bin:$PATH"
+
+EXPOSE 7860
+
+CMD ["python", "deploy/deploy_gradio.py", ]
