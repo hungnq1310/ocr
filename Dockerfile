@@ -51,7 +51,7 @@ WORKDIR /ocr/
 COPY --from=build /venv /venv
 
 # Enable venv
-ENV PATH="venv/bin:$PATH"
+ENV PATH="/venv/bin:$PATH"
 
 RUN pip install . && \ 
     pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
