@@ -37,7 +37,7 @@ ENTRYPOINT source /venv/bin/activate && \
     python /ocr/deploy_gradio.py && \
     tail -f /dev/null
 
-# # Test with new usage case
+# Test with new usage case
 # FROM python:3.11-slim as compiler
 # ENV PYTHONUNBUFFERED 1
 
