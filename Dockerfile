@@ -69,4 +69,4 @@ ENV PATH="/venv/bin:$PATH"
 
 EXPOSE 7860
 
-CMD ["python", "deploy/deploy_gradio.py", ]
+CMD python deploy/deploy_gradio.py
