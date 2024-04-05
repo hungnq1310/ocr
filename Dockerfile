@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install libgl1-mesa-glx libegl1-mesa libopengl0 -y
 SHELL ["/bin/bash", "-c"]
 #
 ENTRYPOINT source /venv/bin/activate && \
-    python ocr/deploy_gradio.py && \
+    python deploy_gradio.py && \
     tail -f /dev/null
 
 # Test with new usage case
