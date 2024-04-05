@@ -9,7 +9,7 @@ RUN apt-get update && \
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "craftdet", "/bin/bash", "-c"]
 # 
-RUN pip uninstall pillow && \
+RUN pip uninstall pillow -y && \
     pip install vietocr && \
     pip install . 
 # 
