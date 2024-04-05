@@ -219,4 +219,5 @@ if __name__ == '__main__':
                 ocr_predict,               
             ]
         )
-    demo.queue().launch(server_port=7000, server_name='0.0.0.0', share=False)
+    print("Running server...")
+    demo.queue().launch(server_port=7860, server_name='0.0.0.0', share=False)
