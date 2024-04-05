@@ -9,8 +9,8 @@ RUN apt-get update && \
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "craftdet", "/bin/bash", "-c"]
 # 
-RUN mamba uninstall pillow -y && \
-    pip install vietocr && \
+RUN mamba uninstall pillow -y --force && \
+    pip install vietocr gradio && \
     pip install . 
 # 
 RUN conda-pack -n craftdet -o /tmp/env.tar && \
@@ -34,10 +34,10 @@ RUN apt-get update && apt-get install libgl1-mesa-glx libegl1-mesa libopengl0 -y
 SHELL ["/bin/bash", "-c"]
 #
 ENTRYPOINT source /venv/bin/activate && \
-    python /ocr/deploy_gradio.py && \
+    python deploy_gradio.py && \
     tail -f /dev/null
 
-# # Test with new usage case
+# Test with new usage case
 # FROM python:3.11-slim as compiler
 # ENV PYTHONUNBUFFERED 1
 
