@@ -33,5 +33,6 @@ SHELL ["/bin/bash", "-c"]
 ENTRYPOINT source /venv/bin/activate && \
            pip install . && \ 
            pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
-           pip install gradio vietocr pdf2image && \
-           python deploy/deploy_gradio.py
+           pip install gradio vietocr pdf2image
+            
+CMD [ "python", "deploy/deploy_gradio.py"]
