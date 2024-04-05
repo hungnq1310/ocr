@@ -4,11 +4,12 @@ FROM hieupth/mamba:pypy3 AS build
 ADD . .
 RUN apt-get update && \
     mamba install -c conda-forge conda-pack && \
-    mamba env create -f environment.yml
+    mamba env create -f environment.yml 
 
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "craftdet", "/bin/bash", "-c"]
-
+# 
+RUN pip install .
 # 
 RUN conda-pack -n craftdet -o /tmp/env.tar && \
     mkdir /venv && cd /venv && tar xf /tmp/env.tar && \
@@ -30,11 +31,9 @@ RUN apt-get update && apt-get install libgl1-mesa-glx libegl1-mesa libopengl0 -y
 # 
 SHELL ["/bin/bash", "-c"]
 #
-RUN source /venv/bin/activate && \
-    pip install . && \ 
-    pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
-    pip install gradio vietocr pdf2image && \
-    python /ocr/deploy/deploy_gradio.py
+ENTRYPOINT source /venv/bin/activate && \
+    python /ocr/deploy/deploy_gradio.py && \
+    tail -f /dev/null
 
 # # Test with new usage case
 # FROM python:3.11-slim as compiler
