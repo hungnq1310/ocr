@@ -10,7 +10,7 @@ RUN apt-get update && \
 SHELL ["conda", "run", "-n", "craftdet", "/bin/bash", "-c"]
 # 
 RUN mamba uninstall pillow -y && \
-    pip install vietocr && \
+    pip install vietocr gradio && \
     pip install . 
 # 
 RUN conda-pack -n craftdet -o /tmp/env.tar && \

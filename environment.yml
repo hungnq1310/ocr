@@ -9,5 +9,4 @@ dependencies:
   - onnxruntime
   - fastapi
   - mmcv=2.1.0
-  - gradio 
   - pdf2image
