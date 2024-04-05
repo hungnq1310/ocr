@@ -9,7 +9,9 @@ RUN apt-get update && \
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "craftdet", "/bin/bash", "-c"]
 # 
-RUN pip install .
+RUN pip uninstall pillow && \
+    pip install vietocr && \
+    pip install . 
 # 
 RUN conda-pack -n craftdet -o /tmp/env.tar && \
     mkdir /venv && cd /venv && tar xf /tmp/env.tar && \
