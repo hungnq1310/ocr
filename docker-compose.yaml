@@ -2,6 +2,6 @@ services:
   ocr:
     image: heronq1310/deploying:latest
     ports:
-      - "7000:7000"
+      - 7000:7000
     volumes:
       - ./weights:/ocr/weights
