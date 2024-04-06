@@ -3,8 +3,9 @@ FROM hieupth/mamba:pypy3 AS build
 
 ADD . .
 RUN apt-get update && \
-    mamba update -n base -c conda-forge conda && \
-    mamba install -c conda-forge conda-pack && \
+    mamba update -n base -c conda-forge conda -y
+
+RUN mamba install -c conda-forge conda-pack && \
     mamba env create -f environment.yml 
 
 # Make RUN commands use the new environment:
