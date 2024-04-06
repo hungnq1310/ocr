@@ -12,7 +12,7 @@ RUN mamba install -c conda-forge conda-pack && \
 SHELL ["conda", "run", "-n", "craftdet", "/bin/bash", "-c"]
 # 
 RUN mamba uninstall pillow -y --force && \
-    pip install vietocr gradio && \
+    pip install vietocr && \
     pip install . 
 # 
 RUN conda-pack -n craftdet -o /tmp/env.tar && \

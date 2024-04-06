@@ -2,6 +2,7 @@ name: craftdet
 
 dependencies:
   - python=3.11
+  - gradio
   - pytorch
   - torchvision 
   - opencv
