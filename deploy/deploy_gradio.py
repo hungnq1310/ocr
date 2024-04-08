@@ -44,7 +44,7 @@ lsd = cv2.createLineSegmentDetector()
 detector = Detector(
     craft=os.getcwd() + '/weights/craft/mlt25k.pth',
     refiner=os.getcwd() + '/weights/craft/refinerCTW1500.pth',
-    use_cuda=True
+    use_cuda=False
 )
 #
 config = Cfg.load_config_from_name('vgg_transformer')
@@ -74,7 +74,7 @@ def predict(img_intput, save_path, filename, recti_model):
 
     with torch.no_grad():
         recti_model.eval()
-        input_ = torch.from_numpy(input_img).permute(2, 0, 1).cuda()
+        input_ = torch.from_numpy(input_img).permute(2, 0, 1)
         input_ = input_.unsqueeze(0)
         start = time.time()
 
@@ -127,6 +127,7 @@ def run(file_paths):
             print("Converting PDF to images...")
             images = pdf2imgs(file_path)
         elif extension in ['jpg', 'jpeg', 'png']:
+            print("Processing images...")
             images.append(Image.open(file_path))
         elif extension in ['mp4']:
             cap = cv2.VideoCapture(file_path)
@@ -220,4 +221,4 @@ if __name__ == '__main__':
             ]
         )
     print("Running server...")
-    demo.queue().launch(server_port=7860, server_name='0.0.0.0', share=False)
+    demo.launch(share=False, server_name="0.0.0.0")
