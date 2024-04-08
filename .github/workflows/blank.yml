@@ -33,4 +33,4 @@ jobs:
         with:
           push: true
           platforms: linux/amd64, linux/arm64
-          tags: heronq1310/deploying:cpu-v0.1
+          tags: heronq1310/deploying:cuda-v0.1

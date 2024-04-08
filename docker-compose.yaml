@@ -1,7 +1,8 @@
 services:
   ocr:
-    image: heronq1310/deploying:latest
-    ports:
-      - 7000:7000
+    shm_size: '4gb'
+    image: heronq1310/deploying:cpu-v0.1
     volumes:
       - ./weights:/ocr/weights
+    ports:
+      - "7860:7860"

@@ -29,10 +29,10 @@ save_origin_path = Path(os.getcwd() + "/prediction/origin").expanduser().resolve
 #
 recti_model = DewarpTextlineMaskGuide(image_size=DEFAULT_SIZE_IMAGE)
 recti_model = torch.nn.DataParallel(recti_model)
-state_dict = torch.load(os.getcwd() + '/weights/rectification/30.pt', map_location='cpu')
+state_dict = torch.load(os.getcwd() + '/weights/rectification/30.pt', map_location='cuda:0')
 #
 recti_model.load_state_dict(state_dict)
-# recti_model.cuda()
+recti_model.cuda()
 save_rectif_path = Path(os.getcwd()+ "/prediction/rectification").expanduser().resolve()
 
 ########
@@ -44,12 +44,12 @@ lsd = cv2.createLineSegmentDetector()
 detector = Detector(
     craft=os.getcwd() + '/weights/craft/mlt25k.pth',
     refiner=os.getcwd() + '/weights/craft/refinerCTW1500.pth',
-    use_cuda=False
+    use_cuda=True
 )
 #
 config = Cfg.load_config_from_name('vgg_transformer')
 config['weights'] = str(Path(os.getcwd() + '/weights/ocr/vgg_transformer.pth').expanduser().resolve())
-config['device'] = 'cpu'
+config['device'] = 'cuda:0'
 ocr = Predictor(config)
 save_ocr_path = Path(os.getcwd()+ "/prediction/ocr").expanduser().resolve()
 
@@ -74,7 +74,7 @@ def predict(img_intput, save_path, filename, recti_model):
 
     with torch.no_grad():
         recti_model.eval()
-        input_ = torch.from_numpy(input_img).permute(2, 0, 1)
+        input_ = torch.from_numpy(input_img).permute(2, 0, 1).cuda()
         input_ = input_.unsqueeze(0)
         start = time.time()
 
