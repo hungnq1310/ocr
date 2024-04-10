@@ -15,7 +15,7 @@ ENV PATH="/venv/bin:$PATH"
 RUN pip install . && \ 
     pip install torch torchvision torchaudio && \
     pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
-    pip install vietocr pdf2image opencv-python
+    pip install fastapi vietocr pdf2image opencv-python
 
 # Runtime stage
 FROM python:3.11-slim as runner
@@ -33,4 +33,4 @@ ENV PATH="/venv/bin:$PATH"
 #
 EXPOSE 9000
 #
-ENTRYPOINT uvicorn gfn.api:app --host 0.0.0.0 --port 9000 & tmole 9000
+CMD uvicorn ocr.api:app --port 9000 --reload & tmole 9000
