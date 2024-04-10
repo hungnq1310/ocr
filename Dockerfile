@@ -3,10 +3,8 @@ FROM python:3.11-slim as compiler
 ENV PYTHONUNBUFFERED 1
 
 # Copy 
-ADD . /ocr
-# # set workdir
-WORKDIR /ocr/
-
+ADD . .
+#
 RUN python -m venv /venv 
 
 # Enable venv
@@ -19,8 +17,8 @@ RUN pip install . && \
 # Runtime stage
 FROM python:3.11-slim as runner
 # Copy 
-COPY ./deploy /ocr
-WORKDIR /ocr/
+COPY ./deploy /deploy
+WORKDIR .
 
 #
 RUN apt-get update && apt-get install -y curl ffmpeg libsm6 libxext6 libgl1-mesa-glx libegl1-mesa libopengl0
