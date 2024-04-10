@@ -16,9 +16,9 @@ from fastapi.staticfiles import StaticFiles
 
 from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
-from ocr.craftdet.detection import Detector
-from ocr.preprocessor.model import DewarpTextlineMaskGuide
-from ocr.utils import bbox2ibox, cv2crop, cv2drawbox
+from .craftdet.detection import Detector
+from .preprocessor.model import DewarpTextlineMaskGuide
+from .utils import bbox2ibox, cv2crop, cv2drawbox
 
 
 DEVICE = os.getenv('DEVICE', default="cuda:0")
