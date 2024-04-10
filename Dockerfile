@@ -11,7 +11,7 @@ RUN python -m venv /venv
 ENV PATH="/venv/bin:$PATH"
 
 RUN pip install . && \ 
-    pip install torch torchvision torchaudio fastapi vietocr pdf2image opencv-python uvicorn[standard] && \
+    pip install torch torchvision torchaudio fastapi vietocr pdf2image opencv-python uvicorn[standard] python-multipart && \
     pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html
 
 # Runtime stage
