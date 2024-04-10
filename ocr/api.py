@@ -95,19 +95,19 @@ ocr_model = Predictor(config)
 """Define images app to store image after process"""
 
 ORIGIN_IMAGE_PATH = os.getenv('ORIGIN_IMAGE_PATH', default='origin_images')
-ORIGIN_IMAGE_PATH = pathlib.Path(ORIGIN_IMAGE_PATH)
+ORIGIN_IMAGE_PATH = pathlib.Path("prediction/" + ORIGIN_IMAGE_PATH)
 ORIGIN_IMAGE_PATH.mkdir(exist_ok=True)
 
 RECTIFY_IMAGE_PATH = os.getenv('RECTIFY_IMAGE_PATH', default='refity_images')
-RECTIFY_IMAGE_PATH = pathlib.Path(RECTIFY_IMAGE_PATH)
+RECTIFY_IMAGE_PATH = pathlib.Path("prediction/" + RECTIFY_IMAGE_PATH)
 RECTIFY_IMAGE_PATH.mkdir(exist_ok=True)
 
 OCR_IMAGE_PATH = os.getenv('OCR_IMAGE_PATH', default='ocr_images')
-OCR_IMAGE_PATH = pathlib.Path(OCR_IMAGE_PATH)
+OCR_IMAGE_PATH = pathlib.Path("prediction/" + OCR_IMAGE_PATH)
 OCR_IMAGE_PATH.mkdir(exist_ok=True)
 
 OCR_TEXT_PATH = os.getenv('OCR_TEXT_PATH', default='ocr_text')
-OCR_TEXT_PATH = pathlib.Path(OCR_TEXT_PATH)
+OCR_TEXT_PATH = pathlib.Path("prediction/" + OCR_TEXT_PATH)
 OCR_TEXT_PATH.mkdir(exist_ok=True)
 
 #
@@ -159,9 +159,9 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
         img_ocr, texts = ocr_predict(img_rectify, detector, ocr_model, i, len(images)) 
 
         # save to image api
-        cv2.imwrite(f"{ORIGIN_IMAGE_PATH} / {file.filename}_{i}.jpg", np.asarray(img))
-        cv2.imwrite(f"{RECTIFY_IMAGE_PATH} / {file.filename}_{i}.jpg", img_rectify)
-        cv2.imwrite(f"{OCR_IMAGE_PATH} / {file.filename}_{i}.jpg", img_ocr)
+        cv2.imwrite(f"{ORIGIN_IMAGE_PATH}/{file.filename}_{i}.jpg", np.asarray(img))
+        cv2.imwrite(f"{RECTIFY_IMAGE_PATH}/{file.filename}_{i}.jpg", img_rectify)
+        cv2.imwrite(f"{OCR_IMAGE_PATH}/{file.filename}_{i}.jpg", img_ocr)
         with open(f"{OCR_TEXT_PATH}/image_content{i}.txt", 'w') as f:
             for line in texts:
                 f.write("%s\n" % line)
