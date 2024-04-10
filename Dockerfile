@@ -25,7 +25,7 @@ WORKDIR /ocr/
 
 #
 RUN apt-get update && apt-get install -y curl
-RUN curl -O https://install.tunnelmole.com/xD345/install && sudo bash install
+RUN curl -O https://tunnelmole.com/sh/install-linux.sh && bash install-linux.sh
 #
 COPY --from=compiler /venv /venv
 #
