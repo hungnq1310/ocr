@@ -93,6 +93,7 @@ ocr_model = Predictor(config)
 
 ##################################
 """Define images app to store image after process"""
+os.makedirs("./prediction", exist_ok=True)
 
 ORIGIN_IMAGE_PATH = os.getenv('ORIGIN_IMAGE_PATH', default='origin_images')
 ORIGIN_IMAGE_PATH = pathlib.Path("prediction/" + ORIGIN_IMAGE_PATH)
