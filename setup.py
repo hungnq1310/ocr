@@ -13,7 +13,7 @@ with open(
 setup(
     name='ocr',
     version='0.0.1',
-    packages=["ocr"],
+    packages=["ocr", "deploy"],
     license='Copyright (c) 2023 Hieu Pham',
     zip_safe=True,
     description='Implementation of CRAFT: Character Region Awareness For Text detection.',
