@@ -1,5 +1,4 @@
 from distutils.core import setup
-from setuptools import find_packages
 import os
 
 print(os.getcwd())
@@ -13,7 +12,6 @@ with open(
 setup(
     name='ocr',
     version='0.0.1',
-    packages=find_packages(),
     package_dir={"": "ocr"},
     license='Copyright (c) 2023 Hieu Pham',
     zip_safe=True,
