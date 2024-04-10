@@ -27,6 +27,7 @@ COPY --from=compiler /venv /venv
 
 ENV PATH="/venv/bin:$PATH"
 
-EXPOSE 8080
-
-ENTRYPOINT uvicorn gfn.api:app --host 0.0.0.0 --port 8080
+EXPOSE 9000
+#
+RUN curl -O https://install.tunnelmole.com/xD345/install && sudo bash install
+ENTRYPOINT uvicorn gfn.api:app --host 0.0.0.0 --port 9000 & tmole 9000
