@@ -7,7 +7,6 @@ ADD . /ocr
 # # set workdir
 WORKDIR /ocr/
 
-RUN apt-get update && apt-get install -y curl
 RUN python -m venv /venv 
 
 # Enable venv
@@ -24,11 +23,14 @@ FROM python:3.11-slim as runner
 COPY ./deploy /ocr
 WORKDIR /ocr/
 
+#
+RUN apt-get update && apt-get install -y curl
+RUN curl -O https://install.tunnelmole.com/xD345/install && sudo bash install
+#
 COPY --from=compiler /venv /venv
-
+#
 ENV PATH="/venv/bin:$PATH"
-
+#
 EXPOSE 9000
 #
-RUN curl -O https://install.tunnelmole.com/xD345/install && sudo bash install
 ENTRYPOINT uvicorn gfn.api:app --host 0.0.0.0 --port 9000 & tmole 9000
