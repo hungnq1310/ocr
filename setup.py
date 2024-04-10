@@ -11,9 +11,9 @@ with open(
     description = file.read()
 
 setup(
-    name='src',
+    name='ocr',
     version='0.0.1',
-    packages=find_packages(),
+    packages=["ocr"],
     license='Copyright (c) 2023 Hieu Pham',
     zip_safe=True,
     description='Implementation of CRAFT: Character Region Awareness For Text detection.',
