@@ -1,11 +1,7 @@
-
-from pathlib import Path
-import gradio as gr
-import time
 import cv2
 import numpy as np
 import os
-import glob
+import io
 import torch
 import torch.nn.functional as F
 import pathlib
@@ -76,6 +72,7 @@ def ocr_predict(img_rectify, detector, ocr_model, idx, number_images):
 
 # Rerctification
 recti_model = DewarpTextlineMaskGuide(image_size=IMAGE_SIZE)
+recti_model = torch.nn.DataParallel(recti_model)
 state_dict = torch.load(os.getcwd() + '/weights/rectification/30.pt', map_location=DEVICE)
 #
 recti_model.load_state_dict(state_dict)
@@ -90,7 +87,7 @@ detector = Detector(
 )
 #
 config = Cfg.load_config_from_name('vgg_transformer')
-config['weights'] = str(Path(os.getcwd() + '/weights/ocr/vgg_transformer.pth').expanduser().resolve())
+config['weights'] = str(os.getcwd() + '/weights/ocr/vgg_transformer.pth')
 config['device'] = DEVICE
 ocr_model = Predictor(config)
 
@@ -134,6 +131,10 @@ app = FastAPI()
 app.mount("/imageapi", image_api)
 
 #
+@app.get("/")
+def root():
+    return {"Hello": "Main Apps"}
+#
 @app.post("/upload/")
 async def upload_file(request: Request, file: UploadFile = File(...)):
     request_object_content = await file.read()
@@ -143,7 +144,7 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
     try: 
         images = []
         if extension in ["jpg", "jpeg", "png"]:
-            images = [Image.open(request_object_content)]
+            images = [Image.open(io.BytesIO(request_object_content))]
         elif extension in ["pdf"]:
             images = pdf2image.convert_from_bytes(request_object_content)
     except:
