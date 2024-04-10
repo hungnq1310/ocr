@@ -58,7 +58,7 @@ def ocr_predict(img_rectify, detector, ocr_model, idx, number_images):
     z = detector.detect(img_rectify)
 
     batch_img_rectify_crop = []
-    for j in tqdm(range(len(z['boxes'])), desc='Process page ({}/{})'.format(idx + 1, len(number_images))):
+    for j in tqdm(range(len(z['boxes'])), desc='Process page ({}/{})'.format(idx + 1, number_images)):
         ib = bbox2ibox(z['boxes'][j])
         img_rectify_crop = cv2crop(img_rectify, ib[0], ib[1])
         batch_img_rectify_crop.append(Image.fromarray(img_rectify_crop))
