@@ -14,7 +14,7 @@ RUN python -m venv /venv
 ENV PATH="/venv/bin:$PATH"
 
 RUN pip install . && \ 
-    pip install pycurl torch torchvision torchaudio && \
+    pip install torch torchvision torchaudio && \
     pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
     pip install vietocr pdf2image opencv-python
 
