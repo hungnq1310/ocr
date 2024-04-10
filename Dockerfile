@@ -12,7 +12,7 @@ RUN python -m venv /venv
 # Enable venv
 ENV PATH="/venv/bin:$PATH"
 
-RUN apt-get -y install curl &&\
+RUN apt-get -y install pycurl &&\
     pip install . && \ 
     pip install torch torchvision torchaudio && \
     pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
