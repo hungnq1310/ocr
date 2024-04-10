@@ -19,9 +19,9 @@ from tqdm import tqdm
 
 from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
-from src.craftdet.detection import Detector
-from src.preprocessor.model import DewarpTextlineMaskGuide
-from src.utils import pdf2imgs, bbox2ibox, cv2crop, cv2drawbox
+from ocr.craftdet.detection import Detector
+from ocr.preprocessor.model import DewarpTextlineMaskGuide
+from ocr.utils import pdf2imgs, bbox2ibox, cv2crop, cv2drawbox
 
 
 def get_args():

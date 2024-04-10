@@ -2,10 +2,10 @@
 import time
 import torch
 import numpy as np
-from src.craftdet.models.utils import load_model
-from src.craftdet.models import CraftNet, RefineNet
-from src.craftdet.utils import image as image_utils
-from src.craftdet.detection import utils as craft_utils
+from ocr.craftdet.models.utils import load_model
+from ocr.craftdet.models import CraftNet, RefineNet
+from ocr.craftdet.utils import image as image_utils
+from ocr.craftdet.detection import utils as craft_utils
 
 
 class Detector:
