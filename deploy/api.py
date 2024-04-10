@@ -7,12 +7,12 @@ import torch.nn.functional as F
 import pathlib
 
 from PIL import Image
-from pathlib import Path
 from tqdm import tqdm
 import pdf2image
 from fastapi import *
 from fastapi.staticfiles import StaticFiles
-
+import threading
+import uvicorn
 
 from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
@@ -188,3 +188,17 @@ def get_origin():
     return {"retify": origin_imgs}
 
 ##################################
+'''Run as detached mode for integrateing tunnelmole'''
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--host", type=str, default="0.0.0.0")
+    parser.add_argument("--log_level", type=str, default="info")
+    args = parser.parse_args()
+
+    thread = threading.Thread(
+        target=uvicorn.run(app), 
+        kwargs={'host':args.host, 'port':args.port, 'log_level':args.log_level}
+    ).start() 

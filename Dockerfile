@@ -27,6 +27,5 @@ COPY --from=compiler /venv /venv
 #
 ENV PATH="/venv/bin:$PATH"
 #
-EXPOSE 9000
-#
-CMD uvicorn api:app --port 8080 --host 0.0.0.0 & tmole 8080
+CMD python api.py --port 8080
+CMD tmole 8080
