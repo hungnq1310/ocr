@@ -23,7 +23,7 @@ COPY ./deploy /ocr
 WORKDIR /ocr/
 
 #
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y curl ffmpeg libsm6 libxext6 libgl1-mesa-glx libegl1-mesa libopengl0
 RUN curl -O https://tunnelmole.com/sh/install-linux.sh && bash install-linux.sh
 #
 COPY --from=compiler /venv /venv
