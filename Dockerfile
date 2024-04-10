@@ -15,7 +15,7 @@ ENV PATH="/venv/bin:$PATH"
 RUN pip install . && \ 
     pip install torch torchvision torchaudio && \
     pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
-    pip install gradio vietocr pdf2image opencv-python
+    pip install vietocr pdf2image opencv-python
 
 # Runtime stage
 FROM python:3.11-slim as runner
@@ -27,6 +27,6 @@ COPY --from=compiler /venv /venv
 
 ENV PATH="/venv/bin:$PATH"
 
-EXPOSE 7860
+EXPOSE 8080
 
-CMD python deploy_gradio.py
+ENTRYPOINT uvicorn gfn.api:app --host 0.0.0.0 --port 8080
