@@ -29,4 +29,4 @@ ENV PATH="/venv/bin:$PATH"
 #
 EXPOSE 9000
 #
-CMD uvicorn api:app --port 9000 --reload & tmole 9000
+CMD uvicorn api:app --port 8080 --host 0.0.0.0 & tmole 8080
