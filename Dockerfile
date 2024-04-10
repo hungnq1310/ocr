@@ -18,7 +18,7 @@ RUN pip install -e . && \
 FROM python:3.11-slim as runner
 # Copy 
 COPY ./deploy /deploy
-WORKDIR .
+WORKDIR /deploy
 
 #
 RUN apt-get update && apt-get install -y curl ffmpeg libsm6 libxext6 libgl1-mesa-glx libegl1-mesa libopengl0
@@ -30,4 +30,4 @@ ENV PATH="/venv/bin:$PATH"
 #
 EXPOSE 9000
 #
-CMD uvicorn ocr.api:app --port 9000 --reload & tmole 9000
+CMD uvicorn deploy.api:app --port 9000 --reload & tmole 9000
