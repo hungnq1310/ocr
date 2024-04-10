@@ -13,9 +13,8 @@ RUN python -m venv /venv
 ENV PATH="/venv/bin:$PATH"
 
 RUN pip install . && \ 
-    pip install torch torchvision torchaudio && \
-    pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html && \
-    pip install fastapi vietocr pdf2image opencv-python
+    pip install torch torchvision torchaudio fastapi vietocr pdf2image opencv-python uvicorn[standard] && \
+    pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html
 
 # Runtime stage
 FROM python:3.11-slim as runner
