@@ -7,6 +7,7 @@ ADD . /ocr
 # # set workdir
 WORKDIR /ocr/
 
+RUN apt-get update && apt-get install -y curl
 RUN python -m venv /venv 
 
 # Enable venv
