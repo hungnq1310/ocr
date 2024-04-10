@@ -1,4 +1,5 @@
 from distutils.core import setup
+from setuptools import find_packages
 import os
 
 print(os.getcwd())
@@ -12,7 +13,7 @@ with open(
 setup(
     name='ocr',
     version='0.0.1',
-    package_dir={"": "ocr"},
+    packages=find_packages(),
     license='Copyright (c) 2023 Hieu Pham',
     zip_safe=True,
     description='Implementation of CRAFT: Character Region Awareness For Text detection.',
