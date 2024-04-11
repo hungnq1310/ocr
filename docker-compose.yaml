@@ -1,8 +1,16 @@
 services:
   ocr:
     shm_size: '4gb'
-    image: heronq1310/deploying:cpu-v0.1
+    image: heronq1310/deploying:cuda-v0.1
     volumes:
-      - ./weights:/ocr/weights
+      - ./weights:/weights
     ports:
-      - "7860:7860"
+      - "9000:9000"
+    deploy:
+        resources:
+          reservations:
+            devices:
+              - driver: nvidia
+                count: 1
+                capabilities: [gpu]
+    command: uvicorn api:app --port 9000 --host 0.0.0.0
