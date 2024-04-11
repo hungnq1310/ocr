@@ -163,7 +163,7 @@ async def upload_file(request: Request, file: UploadFile = File(...)):
         cv2.imwrite(f"{ORIGIN_IMAGE_PATH}/{file.filename}_{i}.jpg", np.asarray(img))
         cv2.imwrite(f"{RECTIFY_IMAGE_PATH}/{file.filename}_{i}.jpg", img_rectify)
         cv2.imwrite(f"{OCR_IMAGE_PATH}/{file.filename}_{i}.jpg", img_ocr)
-        with open(f"{OCR_TEXT_PATH}/image_content{i}.txt", 'w') as f:
+        with open(f"{OCR_TEXT_PATH}/{file.filename}_content{i}.txt", 'w') as f:
             for line in texts:
                 f.write("%s\n" % line)
 
