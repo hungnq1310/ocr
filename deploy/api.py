@@ -200,5 +200,7 @@ if __name__ == "__main__":
 
     thread = threading.Thread(
         target=uvicorn.run(app), 
-        kwargs={'host':args.host, 'port':args.port, 'log_level':args.log_level}
-    ).start() 
+        kwargs={'host':args.host, 'port':args.port, 'log_level':args.log_level},
+    )
+    thread.setDaemon(True)
+    thread.start()
