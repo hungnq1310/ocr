@@ -17,7 +17,7 @@ from vietocr.tool.predictor import Predictor
 from vietocr.tool.config import Cfg
 from ocr.craftdet.detection import Detector
 from ocr.preprocessor.model import DewarpTextlineMaskGuide
-from ocr.utils import pdf2imgs, bbox2ibox, cv2crop, cv2drawbox
+from ocr.utils import pdf2imgs, bbox2ibox, cv2crop, cv2drawbox, cv2drawboxtext
 
 DEFAULT_SIZE_IMAGE = 224
 save_origin_path = Path(os.getcwd() + "/prediction/origin").expanduser().resolve()
@@ -118,10 +118,12 @@ def run(file_paths):
     # run
     start = time.time()
     for file_path in file_paths:
-        name_file = file_path.split('/')[-1]
-        extension = file_path.split('.')[-1]
+        namefile_only: str = file_path.split('/')[-1]
+        name_file = namefile_only.rsplit('.', 1)[0]
+        extension = namefile_only.rsplit('.', 1)[-1]
 
         images = []
+        vid_writer = None
         # read file
         if extension == 'pdf':
             print("Converting PDF to images...")
@@ -135,54 +137,86 @@ def run(file_paths):
             print("Capturing video...")
             for i in range(nframes):
                 ret, frame = cap.read()
-                images.append(frame)
-            cv2.destroyAllWindows()
-    
+                # save to folder and read again, images will contains path to images
+                ori_img_path = os.path.join(save_origin_path, f'origin_image_{i}.jpg')
+                cv2.imwrite(ori_img_path, np.asarray(frame))
+                images.append(ori_img_path)
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            save_path = Path(name_file).with_suffix('.mp4')  # force *.mp4 suffix on results videos
+            vid_writer = cv2.VideoWriter(f"prediction/{save_path}", cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
+            
+        os.makedirs(os.path.join(save_origin_path, name_file), exist_ok=True)
+        os.makedirs(os.path.join(save_rectif_path, name_file), exist_ok=True)
+        os.makedirs(os.path.join(save_ocr_path, name_file), exist_ok=True)
 
         img_num = 0.0
         for idx, image in enumerate(images):  # img_names:  
+            if extension in ['mp4']:
+                # read image_path
+                image = cv2.imread(image)
+
             # predict rectification
-            filename =  os.path.join(save_rectif_path, f"{name_file}_{idx}.jpg")
-            img_rectify, time_process = predict(image, save_rectif_path, filename, recti_model)
-            img_rectify = np.ascontiguousarray(img_rectify)
-            total_time += time_process
+            # filename =  os.path.join(save_rectif_path, f"{name_file}_{idx}.jpg")
+            # img_rectify, time_process = predict(image, save_rectif_path, filename, recti_model)
+            image = np.ascontiguousarray(image)
+            img_rectify = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+            # total_time += time_process
             img_num += 1
 
             # predict OCR
             texts = []
-            z = detector.detect(img_rectify)
+            z = detector.detect(img_rectify, text_thresh=0.5, link_thresh=0.4)
 
-            batch_img_rectify_crop = []
+            # batch_img_rectify_crop = []
             for j in tqdm(range(len(z['boxes'])), desc='Process page ({}/{})'.format(idx + 1, len(images))):
                 ib = bbox2ibox(z['boxes'][j])
                 img_rectify_crop = cv2crop(img_rectify, ib[0], ib[1])
-                batch_img_rectify_crop.append(Image.fromarray(img_rectify_crop))
-                img_rectify = cv2drawbox(img_rectify, ib[0], ib[1])
-
-            texts = ocr.predict_batch(batch_img_rectify_crop)
+                # batch_img_rectify_crop.append(Image.fromarray(img_rectify_crop))
+                #TODO: draw both box and text
+                text = ocr.predict(Image.fromarray(img_rectify_crop))
+                texts.append(text)
+                # img_rectify = cv2drawbox(img_rectify, ib[0], ib[1])
+                img_rectify = cv2drawboxtext(img_rectify, text, ib[0], ib[1])
+                
+            # texts = ocr.predict_batch(batch_img_rectify_crop)
 
             # Output image.
-            ori_img_path = os.path.join(save_origin_path, f'origin_image_{idx}.jpg')
-            cv2.imwrite(ori_img_path, np.asarray(image))
-            img_path = os.path.join(save_ocr_path, f'{name_file}_{idx}.jpg')
-            img_out = cv2.cvtColor(img_rectify, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(img_path, img_out)
+            if extension in ['jpg', 'jpeg', 'png', 'pdf']:
+                ori_img_path = os.path.join(save_origin_path, name_file, f'{idx}.jpg')
+                img_out = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+                cv2.imwrite(ori_img_path, np.asarray(img_out))
+                img_path = os.path.join(save_ocr_path, name_file, f'{idx}.jpg')
+                # img_out = cv2.cvtColor(img_rectify, cv2.COLOR_BGR2RGB)
+                cv2.imwrite(img_path, img_rectify)
             
-            # Text logs.
-            log_path = os.path.join(save_ocr_path, 'image_content{}.txt'.format(idx))
-            with open(log_path, 'w') as f:
-                for line in texts:
-                    f.write("%s\n" % line)
+                # Text logs.
+                log_path = os.path.join(save_ocr_path, name_file, 'content_{}.txt'.format(idx))
+                with open(log_path, 'w') as f:
+                    for line in texts:
+                        f.write("%s\n" % line)
+
+            if vid_writer is not None:
+                vid_writer.write(img_rectify)
 
             # print('FPS: %.1f' % (1.0 / (total_time / img_num)))
+        if vid_writer is not None:
+            log_path = os.path.join(save_ocr_path, 'video_content.txt'.format(idx))
+            with open(log_path, 'w') as f:
+                for i, line in enumerate(texts):
+                    f.write(f"Frame {i}: {str(line)}\n")
+            vid_writer.release()
+            cv2.destroyAllWindows()
         entime = time.time() - start
         print("Total time for prediction: ", entime)
     
     return [
-        glob.glob(str(save_origin_path) + '/*.jpg'),
-        glob.glob(str(save_ocr_path) + '/*.txt'),
-        glob.glob(str(save_rectif_path) + '/*.jpg'),
-        glob.glob(str(save_ocr_path) + '/*.jpg'),
+        glob.glob(str(save_origin_path) + '/*/*.jpg', recursive=True),
+        glob.glob(str(save_ocr_path) + '/*/*.txt', recursive=True),
+        glob.glob(str(save_rectif_path) + '/*/*.jpg', recursive=True),
+        glob.glob(str(save_ocr_path) + '/*/*.jpg', recursive=True),
     ]
 
 
