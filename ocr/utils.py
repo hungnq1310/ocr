@@ -27,6 +27,25 @@ def cv2drawbox(img, a, b):
     img = cv2.rectangle(img, a, b, color=(255, 0, 0), thickness=2)
     return img
 
+def cv2drawboxtext(img, text, a, b):
+    # dramw box
+    img = cv2.rectangle(img, a, b, color=(255, 0, 0), thickness=2)
+
+    # draw text
+    from PIL import ImageFont, ImageDraw, Image
+    font = ImageFont.truetype("font-times-new-roman/SVN-Times New Roman 2.ttf", 20)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img_pil = Image.fromarray(img)
+    draw = ImageDraw.Draw(img_pil)
+    # https://www.blog.pythonlibrary.org/2021/02/02/drawing-text-on-images-with-pillow-and-python/
+    bbox = draw.textbbox(a, text, font=font, anchor='ls')
+
+    draw.rectangle(bbox, fill="yellow")
+    draw.text(a, text, font=font, anchor='ls', fill="black")
+
+    img = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
+    return img
+
 
 def lineDetect(img):
     # Convert the img to grayscale
